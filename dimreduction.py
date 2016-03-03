@@ -1,4 +1,4 @@
-from numpy import *
+import numpy as np 
 from scipy import linalg
 from scipy.spatial.distance import pdist, squareform
 from scipy import exp
@@ -31,7 +31,7 @@ class pca():
 		eigvec = eigvec[:,idx]
 		k = self.n_components
 		eigveck = eigvec[:, 0:k]
-		X_transformed = dot(C, eigveck)
+		X_transformed = np.dot(C, eigveck)
 		self.components = eigveck
 		self.mean =  X.mean(axis = 0)
 
@@ -41,12 +41,12 @@ class pca():
 		"""
 		perc = sum(eigval[0:k])/sum(eigval)
 
-	return  (X_transformed, perc): 
+		return  (X_transformed, perc)
 
 	def transform(self, X): 
 		
 		C = X- self.mean
-		X_transformed = dot(C, self.components)
+		X_transformed = np.dot(C, self.components)
 		return X_transformed
 
 
@@ -77,32 +77,37 @@ class rbfpca():
 		mat_sq_dists = squareform(sq_dists)
 
 		# Computing the MxM kernel matrix.
+		gamma = self.gamma
 		K = exp(-gamma * mat_sq_dists)
 
 		# Centering the symmetric NxN kernel matrix.
 		N = K.shape[0]
 		one_n = np.ones((N,N)) / N
 		K_norm = K - one_n.dot(K) - K.dot(one_n) + one_n.dot(K).dot(one_n)
+		eigvals, eigvecs = eigh(K_norm)
+		# Obtaining the i eigenvectors (alphas) that corresponds to the i highest eigenvalues (lambdas).
+		n_components = self.n_components
+		alphas = np.column_stack((eigvecs[:,-i] for i in range(1,n_components+1)))
+		lambdas = [eigvals[-i] for i in range(1,n_components+1)]
+		self.lambdas = lambdas
+		self.alphas = alphas
+		self.X_fit = X
+		return alphas
 
-	    # Obtaining eigenvalues in descending order with corresponding
-	    # eigenvectors from the symmetric matrix.
-	    eigvals, eigvecs = eigh(K_norm)
-
-	    # Obtaining the i eigenvectors (alphas) that corresponds to the i highest eigenvalues (lambdas).
-	    n_components = self.n_components
-	    alphas = np.column_stack((eigvecs[:,-i] for i in range(1,n_components+1)))
-	    lambdas = [eigvals[-i] for i in range(1,n_components+1)]
-
-	    self.lambdas = lambdas
-	    self.alphas = alphas
-	    self.X_fit = X
-
-	    return alphas
-
-	def fit_transform(self, X): 
-		# à adapter pour que ça marche sur une matrice X marche pour l'instant sur un vecteur 
-    	X_fit = self.X_fit
-    	pair_dist = np.array([np.sum((X-row)**2) for row in X_fit])
+	def transform(self, X):
+		X_fit = self.X_fit
+    	pairs_d = []
+    	for x in X:
+    		pair_d = [np.sum((x-row)**2) for row in X_fit]
+    		pairs_d.append(pair_d)
+    	pairs_dist = np.array(pairs_d)
+    	
     	k = np.exp(-gamma * pair_dist)
 		return k.dot(alphas / lambdas)
+
+
+
+    	 
+
+
 
