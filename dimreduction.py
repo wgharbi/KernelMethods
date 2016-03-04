@@ -96,13 +96,15 @@ class rbfpca():
 
 	def transform(self, X):
 		X_fit = self.X_fit
-    	pairs_d = []
-    	for x in X:
-    		pair_d = [np.sum((x-row)**2) for row in X_fit]
-    		pairs_d.append(pair_d)
-    	pairs_dist = np.array(pairs_d)
-    	
-    	k = np.exp(-gamma * pair_dist)
+		pairs_d = []
+		for x in X:
+			pair_d = [np.sum((x-row)**2) for row in X_fit]
+			pairs_d.append(pair_d)
+		pairs_dist = np.array(pairs_d)
+		gamma = self.gamma
+		k = np.exp(-gamma * pairs_dist)
+		alphas = self.alphas 
+		lambdas = self.lambdas
 		return k.dot(alphas / lambdas)
 
 
