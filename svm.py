@@ -38,13 +38,15 @@ class SVM:
         G = cvxopt.matrix(np.vstack((G_std, G_slack)))
         h = cvxopt.matrix(np.vstack((h_std, h_slack)))
 
-        A = cvxopt.matrix(y, (1, n_samples))
+        A = cvxopt.matrix(y, (1, n_samples), 'd')
+        print type(A)
         b = cvxopt.matrix(0.0)
 
         alphas = cvxopt.solvers.qp(P, Q, G, h, A, b)
         return np.ravel(alphas['x'])
 
     def fit(self, X, y): 
+        #y must be a matrix of size (n_samples, 1)
         self.x_train = X
         self.y_train = y 
         alphas = self.compute_multipliers(X, y)
