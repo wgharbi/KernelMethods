@@ -62,21 +62,18 @@ class SVM:
         return alphas, bias
 
 
-    def predict(self, X): 
+    def predict(self, x): 
+        #predict the label of a new point x 
         alphas = self.alphas 
-        #TO DO: change SVM implementation to consider only support vectors in the predict
-        bias = self.bias 
+        #TO DO: change SVM implementation to consider only support vectors in the predict 
+        result= self.bias 
         k= self.kernel_function
-        n_samples, n_features = X.shape
-        n_samples_train, n_features_train = self.x_train.shape
-        y= []
-        for i in range(n_samples): 
-            result = []
-            for j in range(n_samples_train): 
-                result += alphas[j]*self.y_train[j]*k(x[i],self.x_train[j])
-            y_i = np.sign(result)
-            y.append(y_i)
-        return y 
+        x_train = self.x_train
+        n_samples_train, n_features_train = x_train.shape
+        for j in range(n_samples_train): 
+            result += alphas[j]*self.y_train[j]*k(x,x_train[j])
+        
+        return np.sign(result).item()
 
 
 
