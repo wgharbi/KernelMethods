@@ -44,7 +44,7 @@ class SVM:
         alphas = cvxopt.solvers.qp(P, Q, G, h, A, b)
         return np.ravel(alphas['x'])
 
-    def train(self, X, y): 
+    def fit(self, X, y): 
         self.x_train = X
         self.y_train = y 
         alphas = self.compute_multipliers(X, y)
