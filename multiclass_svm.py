@@ -4,9 +4,12 @@ import scipy
 from numpy.linalg import norm
 class SVM:
     
-    def __init__(self, C = 1., kernel_function = None):
+    def __init__(self, C = 1., kernel_function = 'min'):
         self.C = C
-        self.kernel_function = lambda a,b : np.inner(a,b)#np.sum(np.minimum(a,b))
+        if kernel_function =='min':
+            self.kernel_function = lambda a,b : np.sum(np.minimum(a,b))
+        if kernel_function =='linear':
+            self.kernel_function = lambda a,b : np.inner(a,b)
         
     
     def fit(self, X, y):
