@@ -101,16 +101,16 @@ class SVM:
                 prediction.append(np.sign(self.classes[1]))
                 
         return prediction
-
+#from svm import SVM
 class multiclass_svm(object):
-    def __init__(self, kernel, c):
+    def __init__(self, kernel = "rbf", C =1.):
         self.kernel = kernel
-        self.c = c
+        self.C = C
     
     def fit(self, X, y):
         self.classes = np.unique(y)
         self.trained_classifiers = [
-            [SVM(C = self.c).fit(X[(y==label) | (y== label2)], y[(y==label)|(y== label2)])
+            [SVM(C = self.C, kernel = self.kernel).fit(X[(y==label) | (y== label2)], y[(y==label)|(y== label2)])
                                                 if label2>label else 0
                                                 for label2 in self.classes] 
                                                 for label in self.classes ]
