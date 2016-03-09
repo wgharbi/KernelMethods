@@ -61,7 +61,7 @@ class SVM:
         self.bias = bias 
         self.alphas = alphas 
 
-        return alphas, bias
+        return self
 
 
     def predict(self, x): 

@@ -14,6 +14,7 @@ class multiclass_svm(object):
                                                 for label2 in self.classes] 
                                                 for label in self.classes ]
         return self
+
         
     def predict(self, X):
         win_count = np.zeros((X.shape[0],len(self.classes)))
