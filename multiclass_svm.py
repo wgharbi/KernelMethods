@@ -2,30 +2,46 @@ import cvxopt
 import numpy as np
 import scipy
 from numpy.linalg import norm
+import cvxopt
 class SVM:
     
-    def __init__(self, C = 1., kernel_function = 'min'):
+    def __init__(self, C = 1., kernel = 'rbf', gamma = None):
         self.C = C
-        if kernel_function =='min':
+        if gamma == None:
+            self.gamma = 0.01
+        else:
+            self.gamma = gamma
+        if kernel =='min':
             self.kernel_function = lambda a,b : np.sum(np.minimum(a,b))
-        if kernel_function =='linear':
+        if kernel =='linear':
             self.kernel_function = lambda a,b : np.inner(a,b)
         
-    
+        if kernel =='rbf':
+            self.kernel_function = lambda a,b : np.exp(- self.gamma * np.linalg.norm( a-b)**2)
+    def gram_matrix(self, X): 
+        n_samples , n_features = X.shape 
+        K = np.zeros((n_samples, n_samples))
+        kernel_function = self.kernel_function
+        for i, x_i in enumerate(X): 
+            for j, x_j in enumerate(X): 
+                K[i,j] = kernel_function(x_i, x_j)
+        return K 
+
     def fit(self, X, y):
         
         n_samples = X.shape[0]
         n_features = X.shape[1]
         self.classes = np.unique(y)
         
-        self.y_train = np.matrix([-1 if label == self.classes[0] else 1 for label in y]).T
+        self.y_train = np.array([-1 if label == self.classes[0] else 1 for label in y])
         self.X_train = X
         y= self.y_train
         if (X.shape[0] != y.shape[0]):
             print "X and y don't have the same size :",X.shape, y.shape
+            exit()
         
         #compute the kernel matrix
-        K = np.array([np.array([self.kernel_function(x,x2) for x2 in X])for x in X])
+        K = self.gram_matrix(X)
         self.K = K
         # Solves
         # min 1/2 x^T P x + q^T x
@@ -57,6 +73,21 @@ class SVM:
                          for j in range(n_samples)]).mean()
         return self
         
+            
+    def predict(self, X):
+        prediction = []
+        kernel= self.kernel_function
+#        K_test = np.array([np.array([self.kernel_function(x,x2) for x2 in X])for x in self.X_train])
+        for i,x in enumerate(X):
+            result = self.b
+            for j in range(self.X_train.shape[0]):
+                result+= self.alpha[j]*self.y_train[j]*kernel(x_train[j],x)#K_test[j,i]
+            if(np.sign(result) <0):
+                prediction.append(self.classes[0])
+            else:
+                prediction.append(self.classes[1])
+                
+        return prediction        
             
     def predict(self, X):
         prediction = []
