@@ -4,10 +4,19 @@ from numpy.linalg import norm
 import cvxopt
 
 class SVM:
-    def __init__(self, C = 1.):
+    def __init__(self, C = 1., kernel = 'rbf', gamma = None):
         self.C = C
-        #self.kernel_function = lambda a,b : np.sum(np.minimum(a,b))
-        self.kernel_function =lambda x,y : np.inner(x, y)
+        if gamma == None:
+            self.gamma = 0.01
+        else:
+            self.gamma = gamma
+        if kernel =='min':
+            self.kernel_function = lambda a,b : np.sum(np.min(np.array(a,b), axis = 0))
+        if kernel =='linear':
+            self.kernel_function = lambda a,b : np.inner(a,b)
+        
+        if kernel =='rbf':
+            self.kernel_function = lambda a,b : np.exp(- self.gamma * np.linalg.norm(a-b)**2)
 
         
     def gram_matrix(self, X): 
@@ -39,7 +48,6 @@ class SVM:
         h = cvxopt.matrix(np.vstack((h_std, h_slack)))
 
         A = cvxopt.matrix(y, (1, n_samples), 'd')
-        print type(A)
         b = cvxopt.matrix(0.0)
 
         alphas = cvxopt.solvers.qp(P, Q, G, h, A, b)
@@ -48,14 +56,16 @@ class SVM:
     def fit(self, X, y): 
         #y must be a matrix of size (n_samples, 1)
         self.x_train = X
-        self.y_train = y 
-        alphas = self.compute_multipliers(X, y)
+        self.classes = np.unique(y)
+        print self.classes
+        self.y_train = np.array([-1 if label == self.classes[0] else 1 for label in y])
+        alphas = self.compute_multipliers(X, self.y_train)
         bias_list = []
         n_samples, n_features = X.shape
-        K = K = self.gram_matrix(X)
+        K = self.gram_matrix(X)
         for j in range(n_samples): 
-            result = np.sum([alphas[i]*y[i]*K[i,j] for i in range(n_samples)])
-            b = y[j] - result
+            result = np.sum([alphas[i]*self.y_train[i]*K[i,j] for i in range(n_samples)])
+            b = self.y_train[j] - result
             bias_list.append(b)
         bias = np.mean(bias_list)
         self.bias = bias 
@@ -64,19 +74,20 @@ class SVM:
         return self
 
 
-    def predict(self, x): 
-        #predict the label of a new point x 
-        alphas = self.alphas 
-        #TO DO: change SVM implementation to consider only support vectors in the predict 
-        result= self.bias 
-        k= self.kernel_function
-        x_train = self.x_train
-        n_samples_train, n_features_train = x_train.shape
-        for j in range(n_samples_train): 
-            result += alphas[j]*self.y_train[j]*k(x,x_train[j])
-        
-        return np.sign(result).item()
+    def predict(self, X):
+        prediction = []
+        K_test = np.array([np.array([self.kernel_function(x,x2) for x2 in X])for x in self.x_train])
+        for i,x in enumerate(X):
+            result = self.bias
+            for j in range(self.x_train.shape[0]):
+                result+= self.alphas[j]*self.y_train[j]*K_test[j,i]
+            if(np.sign(result) <0):
+                prediction.append(self.classes[0])
+            else:
+                prediction.append(self.classes[1])
 
+                
+        return prediction
 
 
 
