@@ -15,7 +15,7 @@ class multiclass_krr(object):
         self.labels = None
 
         if kernel =='min':
-            self.kernel_function = lambda a,b:  np.sum(np.min(np.array([a,b]),axis=0))
+            self.kernel_function = lambda a,b:  np.sum(np.minimum(a,b))
         if kernel =='linear':
             self.kernel_function = lambda a,b : np.inner(a,b)
         if kernel =='rbf':
@@ -43,7 +43,7 @@ class multiclass_krr(object):
         clfs = []
         
         for k, ktem in enumerate(labels_index):
-        	print k
+#        	print k
         	y_new = np.asarray(y.copy() ,dtype=np.float)
         	y_new[labels_index[k]] = 1.
         	y_new[[i for i, j in enumerate(y) if not i in labels_index[k]]] = -1. 
@@ -63,7 +63,7 @@ class multiclass_krr(object):
             y[:,i] = p 
             i += 1
         for j in range(X.shape[0]):
-        	print j 
+        	#print j 
         	y_pred.append(self.labels[np.argmax(y[j,:])])
         return y_pred 
 
