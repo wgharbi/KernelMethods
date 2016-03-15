@@ -11,7 +11,7 @@ class SVM:
         else:
             self.gamma = gamma
         if kernel =='min':
-            self.kernel_function = lambda a,b : np.sum(np.min(np.array(a,b), axis = 0))
+            self.kernel_function = lambda a,b:  np.sum(np.min(np.array([a,b]),axis=0)) 
         if kernel =='linear':
             self.kernel_function = lambda a,b : np.inner(a,b)
         
