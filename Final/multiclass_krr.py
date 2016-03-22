@@ -63,7 +63,6 @@ class multiclass_krr(object):
             y[:,i] = p 
             i += 1
         for j in range(X.shape[0]):
-        	print j 
         	y_pred.append(self.labels[np.argmax(y[j,:])])
         return y_pred 
 
